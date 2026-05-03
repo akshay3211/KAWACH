@@ -40,7 +40,7 @@ function App() {
     fetchVault();
     const refreshTimer = setInterval(() => {
       fetchVault();
-    }, 5000);
+    }, 3000); // Refresh every 3 seconds for faster updates
 
     return () => clearInterval(refreshTimer);
   }, [activeTab]);
@@ -92,7 +92,11 @@ function App() {
 
   const fetchVault = async () => {
     try {
-      const response = await axios.get(apiUrl('/api/vault'));
+      // Add cache-busting timestamp to force fresh fetch
+      const response = await axios.get(apiUrl('/api/vault'), {
+        params: { _t: Date.now() },
+        headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+      });
       setVaultData(response.data.vault);
     } catch (e) {
       console.error(e);
