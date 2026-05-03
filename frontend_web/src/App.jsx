@@ -34,6 +34,17 @@ function App() {
     fetchScore();
   }, []);
 
+  useEffect(() => {
+    if (activeTab !== 'vault') return;
+
+    fetchVault();
+    const refreshTimer = setInterval(() => {
+      fetchVault();
+    }, 5000);
+
+    return () => clearInterval(refreshTimer);
+  }, [activeTab]);
+
   const fetchScore = async () => {
     setLoadingScore(true);
     try {
@@ -97,10 +108,6 @@ function App() {
       console.error(e);
     }
   };
-
-  useEffect(() => {
-    if (activeTab === 'vault') fetchVault();
-  }, [activeTab]);
 
   const getPasswordHygiene = (password) => {
     if (password.length > 12 && /[A-Z]/.test(password) && /[0-9]/.test(password) && /[^A-Za-z0-9]/.test(password)) {
@@ -182,6 +189,7 @@ function App() {
         <input placeholder="Username" className="input-field" value={newVault.username} onChange={e => setNewVault({...newVault, username: e.target.value})} />
         <input type="password" placeholder="Password" className="input-field" value={newVault.password} onChange={e => setNewVault({...newVault, password: e.target.value})} />
         <button className="action-btn" onClick={saveToVault}>Encrypt & Save to Vault</button>
+        <button className="action-btn" onClick={fetchVault} style={{background: '#334155'}}>Refresh Vault</button>
       </div>
 
       <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem', marginTop: '2rem'}}>
