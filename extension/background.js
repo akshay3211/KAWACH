@@ -8,12 +8,19 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   // 🔹 Phishing Check
   if (request.action === "checkPhishing") {
-    fetch('https://kawach-ey6v.onrender.com/api/phishing/check', {
+    fetch(`${BASE_URL}/api/phishing/check`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ url: request.url })
     })
-    .then(res => res.json())
+    .then(async (res) => {
+      const text = await res.text();
+      try {
+        return JSON.parse(text);
+      } catch {
+        return { status: "Error", raw: text };
+      }
+    })
     .then(data => {
       console.log("🛡️ Phishing Response:", data);
       sendResponse(data);
@@ -35,7 +42,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(request.data)
     })
-    .then(res => res.json())
+    .then(async (res) => {
+      const text = await res.text();
+      try {
+        return JSON.parse(text);
+      } catch {
+        return { status: "Error", raw: text };
+      }
+    })
     .then(data => {
       console.log("✅ Vault Response:", data);
       sendResponse(data);
@@ -49,4 +63,3 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
 });
-
