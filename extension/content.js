@@ -164,12 +164,22 @@ document.addEventListener('focusin', (e) => {
         action: "savePassword", 
         data: { website, username, password } 
       }, (response) => {
-        saveBtn.innerHTML = "✅ Saved to Vault!";
-        saveBtn.style.background = "#10b981";
+        if (response && response.status === "Success") {
+          saveBtn.innerHTML = response.message || "✅ Saved to Vault!";
+          saveBtn.style.background = "#10b981";
+          setTimeout(() => {
+            container.remove();
+            window.removeEventListener('scroll', updatePosition);
+          }, 3000);
+          return;
+        }
+
+        saveBtn.innerHTML = response?.message || "❌ Save failed";
+        saveBtn.style.background = "#ef4444";
         setTimeout(() => {
-          container.remove();
-          window.removeEventListener('scroll', updatePosition);
-        }, 3000);
+          saveBtn.innerHTML = "🛡️ Save to KAWACH";
+          saveBtn.style.background = "#6366f1";
+        }, 2500);
       });
     });
   }
