@@ -3,11 +3,9 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 
-# ✅ CORS fix (VERY IMPORTANT)
+# ✅ Enable CORS properly
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
-
-# ✅ Extra headers (Chrome extension ke liye)
 @app.after_request
 def after_request(response):
     response.headers.add('Access-Control-Allow-Origin', '*')
@@ -16,10 +14,16 @@ def after_request(response):
     return response
 
 
-# 🔹 HEALTH CHECK (test ke liye)
-@app.route('/')
-def home():
-    return "KAWACH Backend Running 🚀"
+# 🔥 TEMP STORAGE (RAM)
+vault_data = []
+
+
+# ✅ HEALTH CHECK
+@app.route('/api/health', methods=['GET'])
+def health():
+    return jsonify({
+        "status": "API Running 🚀"
+    })
 
 
 # 🔹 PHISHING API
@@ -28,61 +32,49 @@ def phishing():
     if request.method == 'OPTIONS':
         return '', 200
 
-    try:
-        data = request.get_json()
-        url = data.get('url')
+    data = request.json
+    url = data.get('url')
 
-        print("🔍 Checking URL:", url)
-
-        # Dummy logic (baad me apna OWASP logic daalna)
-        return jsonify({
-            "status": "Safe",
-            "risk_score": 10,
-            "reasons": []
-        })
-
-    except Exception as e:
-        print("❌ Error:", e)
-        return jsonify({
-            "status": "Error",
-            "error": str(e)
-        }), 500
+    return jsonify({
+        "status": "Safe",
+        "risk_score": 10,
+        "reasons": []
+    })
 
 
-# 🔹 VAULT API (PASSWORD SAVE)
-@app.route('/api/vault', methods=['POST', 'OPTIONS'])
+# 🔹 VAULT API (GET + POST)
+@app.route('/api/vault', methods=['GET', 'POST', 'OPTIONS'])
 def vault():
     if request.method == 'OPTIONS':
         return '', 200
 
-    try:
-        data = request.get_json()
+    global vault_data
 
-        website = data.get("website")
-        username = data.get("username")
-        password = data.get("password")
+    # 👉 SAVE DATA
+    if request.method == 'POST':
+        data = request.json
+        print("Received:", data)
 
-        print("🔐 Received Vault Data:")
-        print("Website:", website)
-        print("Username:", username)
-        print("Password:", password)
-
-        # 👉 yaha future me DB save karna
-        # abhi test ke liye direct success
+        vault_data.append(data)
 
         return jsonify({
-            "status": "Success",
-            "message": "Password saved successfully"
+            "status": "Saved",
+            "total": len(vault_data)
         })
 
-    except Exception as e:
-        print("❌ Vault Error:", e)
+    # 👉 GET DATA
+    if request.method == 'GET':
         return jsonify({
-            "status": "Error",
-            "error": str(e)
-        }), 500
+            "vault": vault_data
+        })
 
 
-# 🔥 IMPORTANT (Render ke liye)
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+# 🔥 OPTIONAL ROOT ROUTE (no more 404)
+@app.route('/')
+def home():
+    return "KAWACH API RUNNING 🚀"
+
+
+# 🚀 RUN
+if __name__ == '__main__':
+    app.run(debug=True)
