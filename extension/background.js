@@ -8,7 +8,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   // 🔹 Phishing Check
   if (request.action === "checkPhishing") {
-    fetch(`${BASE_URL}/api/phishing/check`, {
+    fetch('https://kawach-ey6v.onrender.com/api/phishing/check', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ url: request.url })
@@ -49,3 +49,4 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
 });
+
