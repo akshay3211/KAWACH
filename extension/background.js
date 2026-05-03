@@ -1,7 +1,9 @@
 // Background service worker to make API calls to our Python backend
+const BACKEND_BASE_URL = 'https://kawach-ey6v.onrender.com';
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "checkPhishing") {
-    fetch('http://127.0.0.1:5000/api/phishing/check', {
+    fetch(`${BACKEND_BASE_URL}/api/phishing/check`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -19,7 +21,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
   
   if (request.action === "savePassword") {
-    fetch('http://127.0.0.1:5000/api/vault', {
+    fetch(`${BACKEND_BASE_URL}/api/vault`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
