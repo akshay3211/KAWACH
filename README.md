@@ -4,6 +4,12 @@
 
 **KAWACH** is an integrated, enterprise-grade cybersecurity platform that provides real-time security scanning, threat detection, password management, and open-source intelligence (OSINT) capabilities. The platform combines device security analysis, breach detection, phishing URL verification, and secure credential storage in a unified dashboard.
 
+## Live Demo
+
+- Frontend: https://kawach-sandy.vercel.app/
+- Backend API: https://kawach-ey6v.onrender.com/api/health
+- Repository: https://github.com/rachit-005/KAWACH
+
 ## 🌟 Key Features
 
 ### 🔍 **Device Security Scanner**
