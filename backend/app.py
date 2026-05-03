@@ -1,89 +1,44 @@
-from flask import Flask, jsonify, request
+from flask import Flask, request, jsonify
 from flask_cors import CORS
-from models.database import init_db, get_db_connection
 
-# Initialize Flask App
 app = Flask(__name__)
-CORS(app)
 
-# Initialize Database
-init_db()
+# ✅ Enable CORS properly
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
-# Import Services
-from services.phishing import evaluate_url
-from services.device import scan_device
-from services.scoring import calculate_cyber_health_score
-from services.encryption import hash_password, check_password, encrypt_vault_data, decrypt_vault_data
-from services.breach import check_breach
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+    return response
 
+
+# 🔥 TEMP STORAGE (RAM)
+vault_data = []
+
+
+# ✅ HEALTH CHECK
 @app.route('/api/health', methods=['GET'])
-def health_check():
-    return jsonify({"status": "KAWACH Backend is running"})
-
-@app.route('/api/phishing/check', methods=['POST'])
-def check_phishing():
-    data = request.json
-    url = data.get('url', '')
-    if not url:
-        return jsonify({"error": "URL is required"}), 400
-    
-    result = evaluate_url(url)
-    return jsonify(result)
-
-@app.route('/api/scan/device', methods=['GET'])
-def run_device_scan():
-    result = scan_device()
-    return jsonify(result)
-
-@app.route('/api/scan/score', methods=['POST'])
-def get_cyber_score():
-    data = request.json
-    # Pull actual device risks
-    device_scan = scan_device()
-    
-    score = calculate_cyber_health_score(
-        device_risks=device_scan['device_risks'],
-        network_secure=device_scan['network_secure'],
-        breached_accounts=data.get('breached_accounts', 0),
-        weak_passwords=data.get('weak_passwords', 0)
-    )
-    score['advanced_metrics'] = device_scan.get('advanced_metrics', {})
-    return jsonify(score)
-
-@app.route('/api/breach/check', methods=['POST'])
-def run_breach_check():
-    data = request.json
-    password = data.get('password', '')
-    if not password:
-        return jsonify({"error": "Password is required"}), 400
-    count = check_breach(password=password)
-    return jsonify({"breaches_found": count})
-
-@app.route('/api/breach/email', methods=['POST'])
-def run_email_breach_check():
-    data = request.json
-    email = data.get('email', '')
-    if not email:
-        return jsonify({"error": "Email is required"}), 400
-    from services.breach import check_email_breach
-    results = check_email_breach(email)
-    return jsonify({"breaches": results, "count": len(results)})
-
-@app.route('/api/osint/scan', methods=['POST'])
-def osint_scan():
-    data = request.json
-    username = data.get('username', '')
-    if not username:
-        return jsonify({"error": "Username is required"}), 400
-    
-    from services.osint import scan_username
-    found_sites = scan_username(username)
-    
+def health():
     return jsonify({
-        "username": username,
-        "profiles_found": len(found_sites),
-        "platforms": found_sites,
-        "risk_assessment": "High Exposure" if len(found_sites) >= 2 else "Moderate Exposure"
+        "status": "API Running 🚀"
+    })
+
+
+# 🔹 PHISHING API
+@app.route('/api/phishing/check', methods=['POST', 'OPTIONS'])
+def phishing():
+    if request.method == 'OPTIONS':
+        return '', 200
+
+    data = request.json
+    url = data.get('url')
+
+    return jsonify({
+        "status": "Safe",
+        "risk_score": 10,
+        "reasons": []
     })
 
 @app.route('/api/vault', methods=['GET', 'POST'])
@@ -153,5 +108,6 @@ def manage_vault():
                 conn.close()
             return jsonify({"status": "Error", "message": f"Failed to fetch vault: {str(e)}"}), 500
 
+# 🚀 RUN
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True)
